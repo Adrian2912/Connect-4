@@ -1,7 +1,15 @@
-updateGameStatus("Player 1's turn");
-const pieces = document.getElementsByClassName("piece");
-const columns = [6, 6, 6, 6, 6, 6, 6];
+
+updateGameStatus("Red's turn");
+const piecesGenerator = document.getElementsByClassName("piece");
+const pieces = []
+const rows = [5, 5, 5, 5, 5, 5, 5];
 let player1Turn = true, freeCells = 42, currentColor = "rgb(201, 26, 9)", over = false;
+for (let i = 0; i < 6; ++i) {
+  pieces.push([]);
+  for (let j = 0; j < 7; ++j) {
+    pieces[i].push(piecesGenerator[j * 6 + i]);
+  }
+}
 
 function updateGameStatus(message) {
     document.querySelector("p").innerText = message;
@@ -11,85 +19,93 @@ function endGameOrContinue(maxConsecutivePieces) {
     if (maxConsecutivePieces >= 4) {
         over = true; 
         if(player1Turn) {
-            updateGameStatus("Player 1 wins");
+            updateGameStatus("Red wins");
         } else { 
-            updateGameStatus("Player 2 wins");
+            updateGameStatus("Blue wins");
         }
     }
 } 
 
-function verifyVictory(column) {
-    const currentPiece = column * 6 + columns[column] - 1; 
-    let rowBegin = currentPiece, columnBegin = currentPiece, firstDiagonalBegin = currentPiece, secondDiagonalBegin = currentPiece, consecutivePieces = 1, maxConsecutivePieces = 1;
-    while (rowBegin >= 6) {
-        rowBegin -= 6;
-    }   
-    for (let i = 0; i < 6; ++i) {
-        if (String(pieces[rowBegin].style.backgroundColor) === currentColor && String(pieces[rowBegin + 6].style.backgroundColor) === currentColor) {
-            ++consecutivePieces;  
-            if (consecutivePieces > maxConsecutivePieces) {
-                maxConsecutivePieces = consecutivePieces;   
-            } 
-        } else {
-            consecutivePieces = 1;   
-        }  
-        rowBegin += 6;
+function verifyRow(x) {
+  let consecutivePieces = 1, maxConsecutivePieces = 1;
+  for (let i = 0; i < 6; ++i) {
+    if (String(pieces[x][i].style.backgroundColor) === currentColor && String(pieces[x][i + 1].style.backgroundColor) === currentColor) {
+      ++consecutivePieces;
+      if (consecutivePieces > maxConsecutivePieces) {
+        maxConsecutivePieces = consecutivePieces;
+      }
+    } else {
+      consecutivePieces = 1;
     }
-    consecutivePieces = 1;
-    while (columnBegin % 6) {  
-        --columnBegin;   
+  }
+  endGameOrContinue(maxConsecutivePieces);
+}
+
+function verifyColumn(y) {
+  let consecutivePieces = 1, maxConsecutivePieces = 1;
+  for (let i = 5; i > 0; --i) {
+    if (String(pieces[i][y].style.backgroundColor) === currentColor && String(pieces[i - 1][y].style.backgroundColor) === currentColor) {
+      ++consecutivePieces;
+      if (consecutivePieces > maxConsecutivePieces) {
+        maxConsecutivePieces = consecutivePieces;
+      }
+    } else {
+      consecutivePieces = 1;
     }
-    for (let i = 0; i < 5; ++i) {
-         if (String(pieces[columnBegin].style.backgroundColor) === currentColor && String(pieces[columnBegin + 1].style.backgroundColor) === currentColor) {
-            ++consecutivePieces;  
-            if (consecutivePieces > maxConsecutivePieces) {
-                maxConsecutivePieces = consecutivePieces;   
-            }  
-        } else {
-            consecutivePieces = 1;   
-        } 
-        ++columnBegin;
-    } 
-    consecutivePieces = 1; 
-    while ((firstDiagonalBegin + 1) % 6 !== 0 && firstDiagonalBegin < 36) {
-        firstDiagonalBegin += 7;
+  }
+  endGameOrContinue(maxConsecutivePieces);
+} 
+
+function verifyFirstDiagonal(x, y) {
+  let consecutivePieces = 1, maxConsecutivePieces = 1;
+  while (x != 0 && y != 0) {
+    --x;
+    --y;
+  }
+  while (x < 5  && y < 6) {
+    if (String(pieces[x][y].style.backgroundColor) === currentColor && String(pieces[x + 1][y + 1].style.backgroundColor) === currentColor) {
+      ++consecutivePieces;
+      if (consecutivePieces > maxConsecutivePieces) {
+        maxConsecutivePieces = consecutivePieces;
+      }
+    } else {
+      consecutivePieces = 1;
     }
-    while (firstDiagonalBegin % 6 !== 0 && firstDiagonalBegin > 5) {
-        if (String(pieces[firstDiagonalBegin].style.backgroundColor) === currentColor && String(pieces[firstDiagonalBegin - 7].style.backgroundColor) === currentColor) {
-            ++consecutivePieces;  
-            if (consecutivePieces > maxConsecutivePieces) {
-                maxConsecutivePieces = consecutivePieces;    
-            }    
-        } else {     
-            consecutivePieces = 1;     
-        }  
-        firstDiagonalBegin -= 7;    
-    } 
-    consecutivePieces = 1;
-    while (secondDiagonalBegin > 5 && (secondDiagonalBegin + 1) % 6 !== 0) {
-        secondDiagonalBegin -= 5;  
-    }   
-    while (secondDiagonalBegin % 6 !== 0 && secondDiagonalBegin < 36) {
-        if (String(pieces[secondDiagonalBegin].style.backgroundColor) === currentColor && String(pieces[secondDiagonalBegin + 5].style.backgroundColor) === currentColor) {
-            ++consecutivePieces;  
-            if (consecutivePieces > maxConsecutivePieces) {
-                maxConsecutivePieces = consecutivePieces;    
-            }     
-        } else {      
-            consecutivePieces = 1;     
-        }  
-        secondDiagonalBegin += 5;   
-    } 
-    consecutivePieces = 1; 
-    updateGameStatus(maxConsecutivePieces);   
-    endGameOrContinue(maxConsecutivePieces);  
-}  
-    
+    ++x;
+    ++y
+  }
+  endGameOrContinue(maxConsecutivePieces);
+} 
+
+function verifySecondDiagonal(x, y) {
+  let consecutivePieces = 1, maxConsecutivePieces = 1;
+  while (x != 0 && y != 6) {
+    --x;
+    ++y;
+  }
+  while (x < 5 && y > 0) {
+    if (String(pieces[x][y].style.backgroundColor) === currentColor && String(pieces[x + 1][y - 1].style.backgroundColor) === currentColor) {
+      ++consecutivePieces;
+      if (consecutivePieces > maxConsecutivePieces) {
+        maxConsecutivePieces = consecutivePieces;
+      }
+    } else {
+      consecutivePieces = 1;
+    }
+    ++x;
+    --y;
+  }
+  endGameOrContinue(maxConsecutivePieces);
+}
+
 function dropPiece(column) { 
-    if (columns[column] > 0 && !over) { 
-        pieces[column * 6 + columns[column] - 1].style.backgroundColor = currentColor;
-        verifyVictory(column);
-        --columns[column]; 
+    if (rows[column] >= 0 && !over) { 
+        pieces[rows[column]][column].style.backgroundColor = currentColor;
+        verifyRow(rows[column]);
+        verifyColumn(column);
+        verifyFirstDiagonal(rows[column], column);
+        verifySecondDiagonal(rows[column], column);
+        --rows[column]; 
         --freeCells;
         if (!over && freeCells) {
             switchTurns();
@@ -102,11 +118,11 @@ function dropPiece(column) {
 function switchTurns() {
     if (player1Turn) { 
         currentColor = "rgb(0, 85, 191)";
-        updateGameStatus("Player 2's turn");
+        updateGameStatus("Blue's turn");
         player1Turn = false;
     } else {  
         currentColor = "rgb(201, 26, 9)";   
-        updateGameStatus("Player 1's turn");   
+        updateGameStatus("Red's turn");   
         player1Turn = true; 
     } 
 }       
