@@ -1,30 +1,44 @@
-
 updateGameStatus("Red's turn");
-const piecesGenerator = document.getElementsByClassName("piece");
-const pieces = []
+window.onload = generateBoard;
+const pieces = [];
 const rows = [5, 5, 5, 5, 5, 5, 5];
 let player1Turn = true, freeCells = 42, currentColor = "rgb(201, 26, 9)", over = false;
-for (let i = 0; i < 6; ++i) {
-  pieces.push([]);
-  for (let j = 0; j < 7; ++j) {
-    pieces[i].push(piecesGenerator[j * 6 + i]);
+
+function generateBoard() {
+  for (let i = 0; i < 7; ++i) {
+    let temporaryColumn = document.createElement("div");
+    document.getElementById("mainGrid").appendChild(temporaryColumn);
+    temporaryColumn.classList.add("column");
+    temporaryColumn.addEventListener("click", () => {dropPiece(i)});
+    for (let j = 0; j < 6; ++j) {
+      let temporaryPiece = document.createElement("div");
+      temporaryColumn.appendChild(temporaryPiece);
+      temporaryPiece.classList.add("piece");
+    }
   }
-}
+  const piecesGenerator = document.getElementsByClassName("piece");
+  for (let i = 0; i < 6; ++i) {
+    pieces.push([]);
+    for (let j = 0; j < 7; ++j) {
+      pieces[i].push(piecesGenerator[j * 6 + i]);
+    }
+  }
+} 
 
 function updateGameStatus(message) {
-    document.querySelector("p").innerText = message;
+  document.querySelector("p").innerText = message;
 }  
 
 function endGameOrContinue(maxConsecutivePieces) {
-    if (maxConsecutivePieces >= 4) {
-        over = true; 
-        if(player1Turn) {
-            updateGameStatus("Red wins");
-        } else { 
-            updateGameStatus("Blue wins");
-        }
+  if (maxConsecutivePieces >= 4) {
+      over = true; 
+      if(player1Turn) {
+          updateGameStatus("Red wins");
+      } else { 
+          updateGameStatus("Blue wins");
     }
-} 
+  }
+}
 
 function verifyRow(x) {
   let consecutivePieces = 1, maxConsecutivePieces = 1;
@@ -100,29 +114,29 @@ function verifySecondDiagonal(x, y) {
 
 function dropPiece(column) { 
     if (rows[column] >= 0 && !over) { 
-        pieces[rows[column]][column].style.backgroundColor = currentColor;
-        verifyRow(rows[column]);
-        verifyColumn(column);
-        verifyFirstDiagonal(rows[column], column);
-        verifySecondDiagonal(rows[column], column);
-        --rows[column]; 
-        --freeCells;
-        if (!over && freeCells) {
-            switchTurns();
-        } else if (!freeCells) {  
-            updateGameStatus("Draw");
-        }   
+      pieces[rows[column]][column].style.backgroundColor = currentColor;
+      verifyRow(rows[column]);
+      verifyColumn(column);
+      verifyFirstDiagonal(rows[column], column);
+      verifySecondDiagonal(rows[column], column);
+      --rows[column]; 
+      --freeCells;
+      if (!over && freeCells) {
+          switchTurns();
+      } else if (!freeCells) {  
+          updateGameStatus("Draw");
+      }   
     }     
 }         
  
 function switchTurns() {
     if (player1Turn) { 
-        currentColor = "rgb(0, 85, 191)";
-        updateGameStatus("Blue's turn");
-        player1Turn = false;
+      currentColor = "rgb(0, 85, 191)";
+      updateGameStatus("Blue's turn");
+      player1Turn = false;
     } else {  
-        currentColor = "rgb(201, 26, 9)";   
-        updateGameStatus("Red's turn");   
-        player1Turn = true; 
+      currentColor = "rgb(201, 26, 9)";   
+      updateGameStatus("Red's turn");   
+      player1Turn = true; 
     } 
 }       
